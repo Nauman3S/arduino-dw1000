@@ -112,8 +112,13 @@ const SPISettings* DW1000Class::_currentSPI = &_fastSPI;
  * #### Init and end #######################################################
  * ######################################################################### */
 
+SPIClass* DW1000Class::_spi = &SPI; // default to SPI
+
+void DW1000Class::setSPI(SPIClass* spi) {
+  _spi = spi;
+}
 void DW1000Class::end() {
-	SPI.end();
+	_spi->end();
 }
 
 void DW1000Class::select(uint8_t ss) {
@@ -168,9 +173,9 @@ void DW1000Class::begin(uint8_t irq, uint8_t rst) {
 	// Configure the IRQ pin as INPUT. Required for correct interrupt setting for ESP8266
     	pinMode(irq, INPUT);
 	// start SPI
-	SPI.begin();
+	_spi->begin();
 // #ifndef ESP8266
-	// SPI.usingInterrupt(digitalPinToInterrupt(irq)); // not every board support this, e.g. ESP8266
+	// _spi->usingInterrupt(digitalPinToInterrupt(irq)); // not every board support this, e.g. ESP8266
 // #endif
 	// pin and basic member setup
 	_rst        = rst;
@@ -1681,17 +1686,17 @@ void DW1000Class::readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) 
 			headerLen += 2;
 		}
 	}
-	SPI.beginTransaction(*_currentSPI);
+	_spi->beginTransaction(*_currentSPI);
 	digitalWrite(_ss, LOW);
 	for(i = 0; i < headerLen; i++) {
-		SPI.transfer(header[i]); // send header
+		_spi->transfer(header[i]); // send header
 	}
 	for(i = 0; i < n; i++) {
-		data[i] = SPI.transfer(JUNK); // read values
+		data[i] = _spi->transfer(JUNK); // read values
 	}
 	delayMicroseconds(5);
 	digitalWrite(_ss, HIGH);
-	SPI.endTransaction();
+	_spi->endTransaction();
 }
 
 // always 4 bytes
@@ -1753,17 +1758,17 @@ void DW1000Class::writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t da
 			headerLen += 2;
 		}
 	}
-	SPI.beginTransaction(*_currentSPI);
+	_spi->beginTransaction(*_currentSPI);
 	digitalWrite(_ss, LOW);
 	for(i = 0; i < headerLen; i++) {
-		SPI.transfer(header[i]); // send header
+		_spi->transfer(header[i]); // send header
 	}
 	for(i = 0; i < data_size; i++) {
-		SPI.transfer(data[i]); // write values
+		_spi->transfer(data[i]); // write values
 	}
 	delayMicroseconds(5);
 	digitalWrite(_ss, HIGH);
-	SPI.endTransaction();
+	_spi->endTransaction();
 }
 
 

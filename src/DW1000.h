@@ -47,6 +47,7 @@ public:
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
 	static void begin(uint8_t irq, uint8_t rst = 0xff);
+	static void setSPI(SPIClass* spi);
 	
 	/** 
 	Selects a specific DW1000 chip for communication. In case of a single DW1000 chip in use
@@ -421,6 +422,7 @@ public:
 	static uint8_t _ss;
 	static uint8_t _rst;
 	static uint8_t _irq;
+	static SPIClass* _spi;
 	
 	/* callbacks. */
 	static void (* _handleError)(void);
